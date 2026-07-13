@@ -22,17 +22,6 @@ Cada película se representa con el siguiente objeto JSON:
 }
 ```
 
-### Campos del recurso
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| **id** | `Number` | Identificador único de la película |
-| **nombre** | `String` | Título de la película |
-| **director** | `String` | Nombre del director |
-| **año** | `Number` | Año de estreno |
-| **duracion** | `Number` | Duración en minutos |
-| **genero** | `String` | Género cinematográfico |
-
 ---
 
 **Recurso base:** `/peliculas`
@@ -112,15 +101,6 @@ Cada película se representa con el siguiente objeto JSON:
   "msj": "Película actualizada"
 }
 ```
-
-**Posibles errores:**
-```json
-{ "code": 400, "msj": "Datos inválidos" }
-```
-```json
-{ "code": 404, "msj": "Película no encontrada" }
-```
-
 ---
 
 ### 4. Borrar una película
