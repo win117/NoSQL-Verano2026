@@ -6,30 +6,26 @@ const app = express();
 const mongoose = require("mongoose");
 const PORT = process.env.PORT || 3000;
 
-// Cadena de conexion a MongoDB Atlas
-// El caracter @ de la contrasena va codificado como %40
-const MONGO_URI = "mongodb+srv://Edwin:12345678%40@cluster0.krogocc.mongodb.net/netflix?retryWrites=true&w=majority&appName=Cluster0";
+
+const MONGO_URI = "mongodb+srv://grupo:grupo@servidorprueba.ygegryf.mongodb.net/netflix";
 
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(MONGO_URI).then(()=>{
-
-  console.log("Conectado correctamente a mongo DB");
-}).catch((error)=>{
-  console.error("Error al conectar a mongoDB",error);
-});
-
 app.use(morgan("dev"));
 
-// Frontend: sirve public/index.html, public/api.js y public/app.js
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "clientNetflix")));
 
 const peliculaSchema = new mongoose.Schema(
   {
     titulo:{type: String,required:true,trim:true},
     genero:{type: String,required:true,trim:true},
-    duracion:{type: Number,required:true,min:1}
+    año:{type: Number,required:true,min:1888},
+    duracion:{type: Number,required:true,min:1},
+    idioma:{type: String,required:true,trim:true},
+    calificacion:{type: Number,required:true,min:0,max:10},
+    nc:{type: String,trim:true},         
+    portada:{type: String,trim:true}      
 
   },
   {
@@ -42,7 +38,12 @@ const serieSchema = new mongoose.Schema(
   {
     titulo:{type: String,required:true,trim:true},
     genero:{type: String,required:true,trim:true},
-    temporadas:{type: Number,required:true,min:1}
+    año:{type: Number,required:true,min:1888},
+    temporadas:{type: Number,required:true,min:1},
+    episodios:{type: Number,required:true,min:1},
+    idioma:{type: String,required:true,trim:true},
+    calificacion:{type: Number,required:true,min:0,max:10},
+    nc:{type: String,trim:true}           
 
   },
   {
@@ -82,9 +83,10 @@ app.get("/peliculas/:id", async (req, res) => {
 
 app.post("/peliculas", async (req, res) => {
   try {
-    const { titulo, genero, duracion } = req.body;
+    const { titulo, genero, año, duracion, idioma, calificacion, nc, portada } = req.body;
 
-    if (!titulo || !genero || !duracion) {
+    // calificacion puede ser 0, por eso se compara contra null/undefined
+    if (!titulo || !genero || !año || !duracion || !idioma || calificacion == null) {
       return res.status(400).json({
         mensaje: "Faltan datos de la pelicula",
       });
@@ -93,7 +95,12 @@ app.post("/peliculas", async (req, res) => {
     const nuevaPelicula = new Pelicula({
       titulo: titulo,
       genero: genero,
+      año: año,
       duracion: duracion,
+      idioma: idioma,
+      calificacion: calificacion,
+      nc: nc,
+      portada: portada,
     });
 
     const peliculaGuardada = await nuevaPelicula.save();
@@ -112,9 +119,9 @@ app.post("/peliculas", async (req, res) => {
 
 app.put("/peliculas/:id", async (req, res) => {
   try {
-    const { titulo, genero, duracion } = req.body;
+    const { titulo, genero, año, duracion, idioma, calificacion, nc, portada } = req.body;
 
-    if (!titulo || !genero || !duracion) {
+    if (!titulo || !genero || !año || !duracion || !idioma || calificacion == null) {
       return res.status(400).json({
         mensaje: "Faltan datos de la pelicula",
       });
@@ -122,7 +129,7 @@ app.put("/peliculas/:id", async (req, res) => {
 
     const peliculaActualizada = await Pelicula.findByIdAndUpdate(
       req.params.id,
-      { titulo, genero, duracion },
+      { titulo, genero, año, duracion, idioma, calificacion, nc, portada },
       { new: true, runValidators: true }
     );
 
@@ -197,9 +204,9 @@ app.get("/series/:id", async (req, res) => {
 
 app.post("/series", async (req, res) => {
   try {
-    const { titulo, genero, temporadas } = req.body;
+    const { titulo, genero, año, temporadas, episodios, idioma, calificacion, nc } = req.body;
 
-    if (!titulo || !genero || !temporadas) {
+    if (!titulo || !genero || !año || !temporadas || !episodios || !idioma || calificacion == null) {
       return res.status(400).json({
         mensaje: "Faltan datos de la serie",
       });
@@ -208,7 +215,12 @@ app.post("/series", async (req, res) => {
     const nuevaSerie = new Serie({
       titulo: titulo,
       genero: genero,
+      año: año,
       temporadas: temporadas,
+      episodios: episodios,
+      idioma: idioma,
+      calificacion: calificacion,
+      nc: nc,
     });
 
     const serieGuardada = await nuevaSerie.save();
@@ -227,9 +239,9 @@ app.post("/series", async (req, res) => {
 
 app.put("/series/:id", async (req, res) => {
   try {
-    const { titulo, genero, temporadas } = req.body;
+    const { titulo, genero, año, temporadas, episodios, idioma, calificacion, nc } = req.body;
 
-    if (!titulo || !genero || !temporadas) {
+    if (!titulo || !genero || !año || !temporadas || !episodios || !idioma || calificacion == null) {
       return res.status(400).json({
         mensaje: "Faltan datos de la serie",
       });
@@ -237,7 +249,7 @@ app.put("/series/:id", async (req, res) => {
 
     const serieActualizada = await Serie.findByIdAndUpdate(
       req.params.id,
-      { titulo, genero, temporadas },
+      { titulo, genero, año, temporadas, episodios, idioma, calificacion, nc },
       { new: true, runValidators: true }
     );
 
@@ -285,21 +297,6 @@ app.get("/mensaje", (req, res) => {
   res.send("Mensaje desde Express");
 });
 
-app.get("/pagina", (req, res) => {
-  const nombre = "Alfredo";
-  res.send(`
-    <style>
-      .p1 {
-        color: red;
-        background: black;
-      }
-    </style>
-
-    <h1>Mi catalogo</h1>
-    <p class="p1"> Creada con Express</p>
-    <p> Hola ${nombre}</p>
-  `);
-});
 
 app.get("/pelicula", (req, res) => {
   res.json({
@@ -326,28 +323,21 @@ app.get("/mensaje/:nombre", (req, res) => {
   res.send(`Hola ${req.params.nombre}`);
 });
 
-app.get("/suma/:a/:b", (req, res) => {
-  const a = parseInt(req.params.a);
-  const b = Number(req.params.b);
 
-  res.send(`Resultado: ${a + b}`);
-});
+async function iniciarServidor() {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log("Conectado correctamente a MongoDB");
 
-app.get("/multiplicar/:a/:b", (req, res) => {
-  const a = Number(req.params.a);
-  const b = Number(req.params.b);
-
-  res.send(`Resultado: ${a * b}`);
-});
-
-app.get("/aleatorio", (req, res) => {
-  const numero = Math.floor(Math.random() * 100) + 1;
-  res.send(`Numero generado: ${numero}`);
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor iniciado en localhost:${PORT}`);
-});
+    app.listen(PORT, () => {
+      console.log("Servidor iniciado en http://localhost:" + PORT);
+    });
+  } catch (error) {
+    console.error("No se pudo conectar con MongoDB");
+    console.error(error.message);
+  }
+}
+iniciarServidor();
 
 // Vercel necesita la app exportada
 module.exports = app;

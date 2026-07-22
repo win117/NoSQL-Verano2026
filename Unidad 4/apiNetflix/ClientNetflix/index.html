@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consumir API REST</title>
 
     <style>
@@ -33,11 +32,6 @@
         li {
             margin: 8px 0;
         }
-
-        #mensaje {
-            margin: 10px 0;
-            font-weight: bold;
-        }
     </style>
 </head>
 
@@ -65,9 +59,32 @@
 
         <input
             type="number"
+            id="año"
+            placeholder="Año"
+            required
+        >
+
+        <input
+            type="number"
             id="duracion"
-            placeholder="Duración (minutos)"
-            min="1"
+            placeholder="Duración"
+            required
+        >
+
+        <input
+            type="text"
+            id="idioma"
+            placeholder="Idioma"
+            required
+        >
+
+        <input
+            type="number"
+            id="calificacion"
+            placeholder="Calificación"
+            min="0"
+            max="10"
+            step="0.1"
             required
         >
 
@@ -76,8 +93,6 @@
         </button>
 
     </form>
-
-    <p id="mensaje"></p>
 
     <hr>
 
