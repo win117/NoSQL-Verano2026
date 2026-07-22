@@ -14,7 +14,7 @@ app.use(cors());
 
 app.use(morgan("dev"));
 
-app.use(express.static(path.join(__dirname, "clientNetflix")));
+app.use(express.static(path.join(__dirname, "ClientNetflix")));
 
 const peliculaSchema = new mongoose.Schema(
   {
@@ -324,20 +324,21 @@ app.get("/mensaje/:nombre", (req, res) => {
 });
 
 
-async function iniciarServidor() {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("Conectado correctamente a MongoDB");
-
-    app.listen(PORT, () => {
-      console.log("Servidor iniciado en http://localhost:" + PORT);
-    });
-  } catch (error) {
+// Conexion a MongoDB (se ejecuta tanto en local como en Vercel)
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log("Conectado correctamente a MongoDB"))
+  .catch((error) => {
     console.error("No se pudo conectar con MongoDB");
     console.error(error.message);
-  }
+  });
+
+// Solo escuchar en un puerto cuando corre en local (Vercel no lo necesita)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log("Servidor iniciado en http://localhost:" + PORT);
+  });
 }
-iniciarServidor();
 
 // Vercel necesita la app exportada
 module.exports = app;
